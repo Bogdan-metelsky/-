@@ -1,0 +1,81 @@
+# If you want to use https with valid certificate from LetsEncrypt then you'll need to:
+#
+# 1) Replace the following placeholders with actual values:
+#      @@YOUR_EMAIL@@: your email address (required for LetsEncrypt certificate issuing)
+#      @@DOMAIN@@: your domain name (you could use nip.io service to generate one from your IP if you don't have one, i.e. 127.0.0.1.nip.io)
+# 2) Comment traefik rules with PathPrefix and uncomment with Host
+#    Note that after this change Bonsai will be available only by domain name you specified,
+#    and will not be available by IP.
+
+version: "3.3"
+services:
+  traefik:
+    image: traefik
+    restart: always
+    command:
+#      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--accesslog=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesResolvers.le.acme.storage=/etc/traefik/acme/acme.json"
+      - "--certificatesResolvers.le.acme.email=@@YOUR_EMAIL@@"
+      - "--certificatesResolvers.le.acme.httpChallenge=true"
+      - "--certificatesResolvers.le.acme.httpChallenge.entryPoint=web"
+    ports:
+      - 80:80
+      - 443:443
+      # - 8080:8080 ## If you want to see Traefik's dashboard on custom port
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/acme:/etc/traefik/acme
+
+  bonsai:
+    image: impworks/bonsai:latest
+    restart: unless-stopped
+    volumes:
+      - images:/app/wwwroot/media
+    environment:
+      - ConnectionStrings__Database=Server=postgres;Port=5432;Database=bonsai;User Id=bonsai;Password=test;Persist Security Info=true
+      - Auth__AllowPasswordAuth=true
+      - Auth__Facebook__AppId=
+      - Auth__Facebook__AppSecret=
+      - Auth__Google__ClientId=
+      - Auth__Google__ClientSecret=
+      - Auth__Yandex__ClientId=
+      - Auth__Yandex__ClientSecret=
+      - Auth__Vkontakte__ClientId=
+      - Auth__Vkontakte__ClientSecret=
+      - WebServer__RequireHttps=false
+      - Debug__DetailedExceptions=false
+      - ASPNETCORE_ENVIRONMENT=Production
+    labels:
+      traefik.enable: true
+#      traefik.http.routers.bonsai.rule: Host(`@@DOMAIN@@`)
+      traefik.http.routers.bonsai.rule: PathPrefix(`/`)
+      traefik.http.routers.bonsai.entrypoints: web
+#      traefik.http.routers.bonsai_secure.rule: Host(`@@DOMAIN@@`)
+      traefik.http.routers.bonsai_secure.rule: PathPrefix(`/`)
+      traefik.http.routers.bonsai_secure.entrypoints: websecure
+      traefik.http.routers.bonsai_secure.tls.certresolver: le
+
+      traefik.http.services.bonsai.loadbalancer.server.port: 80
+    stop_signal: SIGKILL
+    links:
+      - postgres
+
+  postgres:
+    image: postgres:12.4
+    restart: unless-stopped
+    volumes:
+      - database:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_USER: bonsai
+      POSTGRES_DB: bonsai
+
+volumes:
+  database: {}
+  images: {}

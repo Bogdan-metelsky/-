@@ -1,0 +1,29 @@
+﻿@model Bonsai.Areas.Front.ViewModels.Search.SearchVM
+@{
+    ViewBag.Title = "Поиск";
+    ViewBag.SearchQuery = Model.Query;
+    Layout = "~/Areas/Front/Views/Layout.cshtml";
+}
+
+<div class="search-results load-on-scroll" data-load-url="@Url.Action("SearchResults", "Search")" data-load-elem-class=".search-result">
+    <h1>Результаты поиска</h1>
+
+    @if (Model.Results.Any())
+    {
+        <input type="hidden" id="search-query-hidden" value="@Model.Query" />
+        @await Html.PartialAsync("SearchResults", Model.Results)
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            @if (!(Model.Query?.Length >= 3))
+            {
+                <text>Запрос слишком короткий. Введите как минимум три символа.</text>
+            }
+            else
+            {
+                <text>По вашему запросу ничего не найдено.</text>
+            }
+        </div>
+    }
+</div>

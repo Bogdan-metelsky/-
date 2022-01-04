@@ -1,0 +1,13 @@
+﻿@model IEnumerable<Bonsai.Areas.Front.ViewModels.Page.InfoBlock.FactGroupVM>
+
+@foreach (var group in Model)
+{
+    <h6 class="fact-group-title">@group.Definition.Title</h6>
+    <table class="fact-group">
+        @foreach (var fact in group.Facts)
+        {
+            @await Html.PartialAsync("~/Areas/Front/Views/Page/Facts/" + fact.GetType().Name + ".cshtml", fact)
+        }
+    </table>
+    <hr />
+}

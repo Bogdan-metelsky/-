@@ -1,0 +1,56 @@
+﻿@import '../variables.scss';
+
+.page-image {
+    display: inline-block;
+    background-size: cover;
+    background-repeat: no-repeat;
+    width: 24px;
+    height: 24px;
+    vertical-align: bottom;
+}
+
+.page-image-links {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+
+    li {
+        @include spaced-list(5px);
+    }
+}
+
+.input-hidden {
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+
+.clickable {
+    cursor: pointer;
+}
+
+.navbar-search {
+    position: relative;
+
+    input[type="text"] {
+        padding-left: 32px;
+    }
+
+    label {
+        display: block;
+        position: absolute;
+        left: 10px;
+        top: 7px;
+    }
+}
+
+.content {
+    padding: 1rem 3rem;
+}
+
+.popover-wrapper {
+    .popover-contents {
+        display: none;
+    }
+}

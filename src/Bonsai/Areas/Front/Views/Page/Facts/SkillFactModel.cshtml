@@ -1,0 +1,23 @@
+﻿@using Bonsai.Code.DomainModel.Facts.Models
+@using Impworks.Utils.Format
+@model SkillFactModel
+
+<tr class="fact">
+    <th class="fact-title">@Model.ShortTitle</th>
+    <td class="fact-value">
+        @foreach (var item in Model.Values)
+        {
+            <div class="fact-item">
+                <span class="fact-item-main">@item.Name</span>
+                @if (item.Proficiency != null)
+                {
+                    <span class="fact-item-extra">(@item.Proficiency.Value.GetEnumDescription())</span>
+                }
+                @if (item.Duration != null)
+                {
+                    <span class="fact-item-extra" title="@item.Duration.Value.ReadableRange">@item.Duration.Value.ShortReadableRange</span>
+                }
+            </div>
+        }
+    </td>
+</tr>

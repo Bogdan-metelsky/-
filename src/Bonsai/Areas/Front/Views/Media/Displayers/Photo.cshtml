@@ -1,0 +1,18 @@
+﻿@using System.Drawing
+@model Bonsai.Areas.Front.ViewModels.Media.MediaVM
+@{
+    string Size(float s) => (s * 100.0f).ToString(System.Globalization.CultureInfo.InvariantCulture) + "%";
+}
+
+<div class="photo-wrapper">
+    <img src="@Url.Content(Model.PreviewPath)" class="media-photo" alt="@(Model.Title ?? "Фото")" />
+    @foreach (var tag in Model.Tags)
+    {
+        if (tag.Rect is RectangleF r)
+        {
+            <a class="photo-tag" href="@Url.Action("Description", "Page", new { key = tag.Page.Key })"
+               style="top: @Size(r.Top); left: @Size(r.Left); right: @Size(1 - r.Right); bottom: @Size(1 - r.Bottom)"
+               title="@tag.Page.Title" data-tag-id="@tag.TagId" data-placement="bottom"></a>
+        }
+    }
+</div>

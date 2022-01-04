@@ -1,0 +1,112 @@
+﻿@using Bonsai.Areas.Admin.ViewModels.Relations
+@using Bonsai.Code.DomainModel.Media
+@using Impworks.Utils.Format
+@addTagHelper *, Bonsai
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model RelationsListVM
+@{
+    ViewBag.Title = "Список связей";
+    Layout = "~/Areas/Admin/Views/Layout.cshtml";
+
+    var baseUrl = Url.Action("Index", "Relations", new { area = "Admin" });
+}
+
+<h1>Список связей</h1>
+
+<div class="clearfix">
+    <div class="float-left">
+        <a class="btn btn-sm btn-outline-secondary" href="@Url.Action("Create", "Relations", new {area = "Admin"})" title="Создать новую связь">
+            <span class="fa fa-plus-circle"></span>
+            Создать
+        </a>
+    </div>
+    <div class="float-right">
+        <form action="@baseUrl" method="GET" class="form-inline">
+            @await Component.InvokeAsync("ListHiddenFilterComponent", new
+            {
+                request = Model.Request,
+                include = new [] { nameof(RelationsListRequestVM.EntityId) }
+            })
+            @if(Model.EntityTitle != null)
+            {
+                @await Component.InvokeAsync("ListItemFilterComponent", new
+                {
+                    url = baseUrl,
+                    request = Model.Request,
+                    propName = nameof(RelationsListRequestVM.EntityId),
+                    title = Model.EntityTitle
+                })
+            }
+            <input type="text" class="form-control form-control-sm mr-sm-2" name="@nameof(RelationsListRequestVM.SearchQuery)" value="@Model.Request.SearchQuery" placeholder="Имя страницы" />
+            <button class="btn btn-sm btn-outline-secondary" type="submit">Найти</button>
+        </form>
+    </div>
+</div>
+
+@if(Model.Items.Any())
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th width="42%">@await Component.InvokeAsync("ListHeaderComponent", new { url = baseUrl, request = Model.Request, propName = nameof(RelationTitleVM.Destination), title = "Cтраница" })</th>
+                <th width="16%">@await Component.InvokeAsync("ListHeaderComponent", new { url = baseUrl, request = Model.Request, propName = nameof(RelationTitleVM.Type), title = "Тип связи" })</th>
+                <th width="42%">@await Component.InvokeAsync("ListHeaderComponent", new { url = baseUrl, request = Model.Request, propName = nameof(RelationTitleVM.Source), title = "Связанная страница" })</th>
+                <th width="1px"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var r in Model.Items)
+            {
+            <tr class="admin-row">
+                <td class="hide-overflow">
+                    <page-image image="@r.Destination.MainPhotoPath" type="@r.Destination.Type" size="@MediaSize.Small"></page-image>
+                    <span title="@r.Destination.Title">@r.Destination.Title</span>
+                </td>
+                <td>
+                    <a href="@Url.Action("Update", "Relations", new {area = "Admin", id = r.Id})" title="Редактировать">
+                        @r.Type.GetEnumDescription()
+                    </a>
+                </td>
+                <td class="hide-overflow">
+                    <page-image image="@r.Source.MainPhotoPath" type="@r.Source.Type" size="@MediaSize.Small"></page-image>
+                    <span title="@r.Source.Title">@r.Source.Title</span>
+                </td>
+                <td class="admin-row-actions">
+                    <a href="@Url.Action("Remove", "Relations", new {area = "Admin", id = r.Id})">
+                        <span class="fa fa-remove" title="Удалить"></span>
+                    </a>
+                    <a href="@Url.Action("Index", "Changesets", new {area = "Admin", entityId = r.Id})">
+                        <span class="fa fa-database" title="История изменений"></span>
+                    </a>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    if(Model.Request.IsEmpty())
+    {
+        <div class="alert alert-info">
+            Не добавлено ни одной связи. <br />
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            По запросу не найдено ни одной связи.
+        </div>
+    }
+}
+
+<div class="clearfix">
+    <div class="pull-right">
+        @await Component.InvokeAsync("ListPaginatorComponent", new
+        {
+            url = baseUrl,
+            request = Model.Request,
+            pageCount = Model.PageCount
+        })
+    </div>
+</div>

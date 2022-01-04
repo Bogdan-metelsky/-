@@ -1,0 +1,63 @@
+﻿@using Bonsai.Code.Services.Config
+@inject BonsaiConfigService ConfigService
+@{
+    var cfg = ConfigService.GetDynamicConfig();
+    var demoCfg = ConfigService.GetStaticConfig().DemoMode;
+}
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>@cfg.Title &mdash; @ViewBag.Title</title>
+    <link href="@Url.Content("~/assets/styles/style.css")" rel="stylesheet" />
+</head>
+<body>
+    <div class="main-container d-flex flex-column">
+        <header class="main-header border-bottom shadow-sm">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <a class="logotype d-flex" href="@Url.Action("Index", "Home", new { Area = "Front" })">
+                            <div class="logotype-image">
+                                <img src="/assets/img/logo.svg">
+                            </div>
+                            <div class="logotype-text">@cfg.Title</div>
+                        </a>
+                    </div>
+                    <div class="col search">
+                    </div>
+                    <div class="col-auto">
+                        @await Component.InvokeAsync("UserHeaderComponent")
+                    </div>
+                </div>
+            </div>
+        </header>
+        <div class="dashboard">
+            <div class="container-fluid">
+                @if (demoCfg.Enabled)
+                {
+                    <div class="alert alert-warning mt-1 mb-4">
+                        <small>Bonsai работает в демонстрационном режиме. Все данные периодически сбрасываются.</small>
+                    </div>
+                }
+                <div class="row">
+                    <div class="col-auto dashboard-sidebar">
+                        @await Component.InvokeAsync("AdminMenuComponent")
+                    </div>
+                    <div class="col dashboard-content">
+                        @RenderBody()
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="@Url.Content("~/assets/scripts/vendor-common.js")"></script>
+    <script src="@Url.Content("~/assets/scripts/vendor-admin.js")"></script>
+    <script src="@Url.Content("~/assets/scripts/vendor-vue.js")"></script>
+    <script src="@Url.Content("~/assets/scripts/common.js")"></script>
+    <script src="@Url.Content("~/assets/scripts/admin.js")"></script>
+    @await Component.InvokeAsync("OperationMessageComponent")
+</body>
+</html>
